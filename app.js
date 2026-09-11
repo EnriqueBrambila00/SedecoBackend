@@ -7,7 +7,7 @@ app.use(express.json());
 
 // Importar rutas
 const usuariosRoutes = require('./routes/usuariosRoutes');
-const rolesRoutes = require('./routes/RolesRoutes');
+const rolesRoutes = require('./routes/rolesRoutes');
 const archivosRoutes = require('./routes/archivosRoutes');
 const estadosRoutes = require('./routes/estadosRoutes');
 const municipiosRoutes = require('./routes/municipiosRoutes');
