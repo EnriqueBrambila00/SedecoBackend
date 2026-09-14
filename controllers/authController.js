@@ -75,12 +75,7 @@ const register = async (req, res) => {
                 apellido_paterno: apellidoPaterno,
                 correo: correo,
                 password: hashedPassword,
-                id_municipio: 1, // Por defecto municipio 1
-                usuarios_roles: {
-                    create: {
-                        id_rol: 2 // Asignar rol 2 automáticamente
-                    }
-                }
+                id_municipio: 1 // Por defecto municipio 1
             }
         });
 
@@ -94,7 +89,7 @@ const register = async (req, res) => {
         });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Error en el servidor al intentar registrar el usuario' });
+        res.status(500).json({ error: 'Detalle del error: ' + error.message });
     }
 };
 
