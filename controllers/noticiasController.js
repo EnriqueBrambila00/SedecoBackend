@@ -2,14 +2,16 @@ const prisma = require('../src/prismaClient');
 
 // Crear una nueva noticia
 const createNoticia = async (req, res) => {
-    const { titulo, contenido, imagen, id_usuario } = req.body;
+    // Aceptamos también 'estatus', pero si no viene, Prisma pondrá 'Activo' por defecto
+    const { titulo, contenido, url_imagen, estatus, id_usuario } = req.body;
     try {
         const nuevaNoticia = await prisma.noticias.create({
             data: {
                 titulo,
                 contenido,
-                imagen,
-                id_usuario
+                url_imagen,
+                estatus: estatus || 'Activo',
+                id_usuario: Number(id_usuario)
             }
         });
         res.status(201).json(nuevaNoticia);
@@ -20,8 +22,14 @@ const createNoticia = async (req, res) => {
 }   
 // Obtener todas las noticias
 const getNoticias = async (req, res) => {
+    const { all } = req.query;
     try {
-        const noticias = await prisma.noticias.findMany();
+        // Si mandan ?all=true devuelvo todas, si no, solo las Activas (para el público)
+        const whereClause = all === 'true' ? {} : { estatus: 'Activo' };
+        
+        const noticias = await prisma.noticias.findMany({
+            where: whereClause
+        });
         res.json(noticias);
     } catch (error) {
         console.error(error);
@@ -57,15 +65,16 @@ const deleteNoticia = async (req, res) => {
 }   
 const updateNoticia = async (req, res) => {
     const { id } = req.params;
-    const { titulo, contenido, imagen, id_usuario } = req.body;
+    const { titulo, contenido, url_imagen, estatus, id_usuario } = req.body;
     try {
         const noticiaActualizada = await prisma.noticias.update({
             where: { id_noticia: Number(id) },
             data: {
                 titulo,
                 contenido,
-                imagen,
-                id_usuario
+                url_imagen,
+                estatus,
+                id_usuario: id_usuario ? Number(id_usuario) : undefined
             }
         });
         res.json(noticiaActualizada);

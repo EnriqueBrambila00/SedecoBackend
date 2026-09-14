@@ -38,16 +38,53 @@ const parsearFecha = (fechaString) => {
 const getUsuarios = async (req, res) => {
   try {
     const usuarios = await prisma.usuarios.findMany({
-      // Puedes incluir relaciones si quieres, por ejemplo el municipio:
-      // include: { municipios: true }
+      include: {
+        usuarios_roles: {
+          include: {
+            roles: true
+          }
+        }
+      }
     });
     
-    // Mapeamos para que a todos los usuarios se les formatee la fecha
-    const usuariosFormateados = usuarios.map(formatearUsuario);
+    // Mapeamos para que a todos los usuarios se les formatee la fecha y rol
+    const usuariosFormateados = usuarios.map(u => {
+      const formatted = formatearUsuario(u);
+      return {
+        ...formatted,
+        id_rol: u.usuarios_roles.length > 0 ? u.usuarios_roles[0].id_rol : 3,
+        rol_nombre: u.usuarios_roles.length > 0 ? u.usuarios_roles[0].roles.nombre_rol : 'Usuario'
+      }
+    });
     res.json(usuariosFormateados);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Error al obtener usuarios' });
+  }
+};
+
+// Actualizar rol de un usuario
+const updateUsuarioRol = async (req, res) => {
+  const { id } = req.params;
+  const { id_rol } = req.body;
+  try {
+    // Eliminar rol existente
+    await prisma.usuarios_roles.deleteMany({
+      where: { id_usuario: Number(id) }
+    });
+    
+    // Crear nuevo rol
+    await prisma.usuarios_roles.create({
+      data: {
+        id_usuario: Number(id),
+        id_rol: Number(id_rol)
+      }
+    });
+
+    res.json({ message: 'Rol actualizado exitosamente' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al actualizar el rol del usuario' });
   }
 };
 
@@ -144,5 +181,6 @@ module.exports = {
   getUsuarioById,
   createUsuario,
   updateUsuario,
+  updateUsuarioRol,
   deleteUsuario
 };
