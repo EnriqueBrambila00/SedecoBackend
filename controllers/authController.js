@@ -63,13 +63,24 @@ const register = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        // Crear el usuario (roles por defecto se pueden asignar aquí si es necesario)
+        // Separar nombre y apellido si es posible, o usar default
+        const partesNombre = nombre.split(' ');
+        const primerNombre = partesNombre[0];
+        const apellidoPaterno = partesNombre.length > 1 ? partesNombre.slice(1).join(' ') : 'Sin Apellido';
+
+        // Crear el usuario con los campos obligatorios
         const nuevoUsuario = await prisma.usuarios.create({
             data: {
-                nombre: nombre,
+                nombre: primerNombre,
+                apellido_paterno: apellidoPaterno,
                 correo: correo,
                 password: hashedPassword,
-                id_rol: 2 // Asumiendo que 2 es "Usuario Normal" / Ciudadano
+                id_municipio: 1, // Por defecto municipio 1
+                usuarios_roles: {
+                    create: {
+                        id_rol: 2 // Asignar rol 2 automáticamente
+                    }
+                }
             }
         });
 
