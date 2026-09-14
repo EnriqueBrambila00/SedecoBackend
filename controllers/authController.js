@@ -6,9 +6,12 @@ const login = async (req, res) => {
     const { correo, password } = req.body;
 
     try {
-        // 1. Verificar si el usuario existe
+        // 1. Verificar si el usuario existe y traer su rol
         const usuario = await prisma.usuarios.findUnique({
-            where: { correo: correo }
+            where: { correo: correo },
+            include: {
+                usuarios_roles: true
+            }
         });
 
         if (!usuario) {
@@ -21,10 +24,15 @@ const login = async (req, res) => {
             return res.status(400).json({ error: 'Correo o contraseña incorrectos' });
         }
 
+        // Extraer el rol (por defecto 3 si no tiene)
+        const idRol = usuario.usuarios_roles && usuario.usuarios_roles.length > 0 
+                      ? usuario.usuarios_roles[0].id_rol 
+                      : 3;
+
         // 3. Crear el Token JWT (El "Gafete")
         // Usamos una clave secreta desde las variables de entorno
         const token = jwt.sign(
-            { id_usuario: usuario.id_usuario, correo: usuario.correo },
+            { id_usuario: usuario.id_usuario, correo: usuario.correo, id_rol: idRol },
             process.env.JWT_SECRET || 'MI_SECRETO_SUPER_SEGURO',
             { expiresIn: '1d' } // El token expira en 1 día
         );
@@ -36,7 +44,8 @@ const login = async (req, res) => {
             usuario: {
                 id_usuario: usuario.id_usuario,
                 nombre: usuario.nombre,
-                correo: usuario.correo
+                correo: usuario.correo,
+                id_rol: idRol
             }
         });
 
@@ -75,7 +84,12 @@ const register = async (req, res) => {
                 apellido_paterno: apellidoPaterno,
                 correo: correo,
                 password: hashedPassword,
-                id_municipio: 1 // Por defecto municipio 1
+                id_municipio: 1, // Por defecto municipio 1
+                usuarios_roles: {
+                    create: {
+                        id_rol: 3 // Asignar rol 3 automáticamente (Usuario Normal)
+                    }
+                }
             }
         });
 
