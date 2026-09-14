@@ -22,6 +22,7 @@ const noticiasRoutes = require('./routes/noticiasRoutes');
 const authRoutes = require('./routes/authRoutes');
 const respuestasRoutes = require('./routes/respuestaRoutes');
 const tramitesRoutes = require('./routes/tramitesRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes');
 
 // Rutas base
 app.use('/api/auth', authRoutes);
@@ -35,6 +36,7 @@ app.use('/api/formulario', formulariosRoutes);
 app.use('/api/noticias', noticiasRoutes);
 app.use('/api/respuestas', respuestasRoutes);
 app.use('/api/tramites', tramitesRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 app.get('/', (req, res) => {
   res.send('¡Hola desde mi servidor con Node y Express!');
