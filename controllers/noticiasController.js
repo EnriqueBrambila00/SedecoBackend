@@ -17,7 +17,7 @@ const createNoticia = async (req, res) => {
         res.status(201).json(nuevaNoticia);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Error al crear la noticia' });
+        res.status(500).json({ error: 'Error al crear la noticia: ' + error.message });
     }
 }   
 // Obtener todas las noticias

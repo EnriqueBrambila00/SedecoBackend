@@ -62,7 +62,7 @@ model noticias {
   titulo            String    @db.VarChar(255)
   contenido         String    @db.Text
   fecha_publicacion DateTime? @default(now()) @db.DateTime(0)
-  url_imagen        String?   @db.VarChar(255)
+  url_imagen        String?   @db.Text
   estatus           String?   @default("Activo") @db.VarChar(20)
   usuarios          usuarios  @relation(fields: [id_usuario], references: [id_usuario], onDelete: Cascade, onUpdate: NoAction, map: "noticias_ibfk_1")
 
