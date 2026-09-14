@@ -46,6 +46,48 @@ const login = async (req, res) => {
     }
 };
 
+const register = async (req, res) => {
+    const { nombre, correo, password } = req.body;
+
+    try {
+        // Verificar si el correo ya está registrado
+        const usuarioExistente = await prisma.usuarios.findUnique({
+            where: { correo: correo }
+        });
+
+        if (usuarioExistente) {
+            return res.status(400).json({ error: 'El correo ya está registrado' });
+        }
+
+        // Encriptar la contraseña (salt = 10 vueltas)
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+        // Crear el usuario (roles por defecto se pueden asignar aquí si es necesario)
+        const nuevoUsuario = await prisma.usuarios.create({
+            data: {
+                nombre: nombre,
+                correo: correo,
+                password: hashedPassword,
+                id_rol: 2 // Asumiendo que 2 es "Usuario Normal" / Ciudadano
+            }
+        });
+
+        res.status(201).json({
+            mensaje: 'Usuario registrado exitosamente',
+            usuario: {
+                id_usuario: nuevoUsuario.id_usuario,
+                nombre: nuevoUsuario.nombre,
+                correo: nuevoUsuario.correo
+            }
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Error en el servidor al intentar registrar el usuario' });
+    }
+};
+
 module.exports = {
-    login
+    login,
+    register
 };
